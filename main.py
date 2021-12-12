@@ -1,5 +1,6 @@
 from itertools import cycle
 import random
+from typing import Dict
 
 """
 BIENVENIDA AL JUEGO Y SETEO DEL NUMERO DE JUGADORES
@@ -22,6 +23,8 @@ def generarMazo():
     return espadas + bastos + oros + copas
 
 mazo = generarMazo()
+
+print("mazo: ", mazo)
 
 """
 CREACION DE JUGADORES
@@ -51,9 +54,6 @@ def entregarCarta(jugador):
 for x in range(3):
     jugadores = map(entregarCarta, jugadores)
 
-for x in jugadores:
-    print(x)
-
 """
 REPARTO DE CARTAS EN LA MESA
 """
@@ -72,14 +72,42 @@ EMPIEZA EL JUEGO
 """
 def jugar(jugador):
     print("Mesa: ", mesa)
-    print("Jugador: ", jugador)
+    print("Jugador: \n")
+    print("\tNombre: ", jugador['nombre'])
+    print("\tCartas: ", jugador['cartas'])
+    respuesta = input('Puede sumar 15?, S/N: ')
+    if respuesta == 's' or respuesta == 'S':
+        carta_mano = int(input('Elija sus cartas: '))
+        carta_mesa = int(input('Elija carta de la mesa que suma 15 con la de su mano: '))
+        print('Carta de mano de jugador: ', jugador['cartas'][carta_mano])
+        print('Carta de meza elejida: ', mesa[carta_mesa])
+        if (jugador['cartas'][carta_mano][0] + mesa[carta_mesa][0]) == 15:
+            jugador['monton'].append(mesa[carta_mesa])
+            jugador['monton'].append(jugador['cartas'][carta_mano])
+            mesa.remove(mesa[carta_mesa])
+            print("nueva mesa: ", mesa)
+            print("nuevo monton jugador: ", jugador['monton'])
+    else: 
+        descartar = int(input('Elija una carta de su mano para dejar en mesa: '))
+        mesa.append(jugador['cartas'][descartar])
+        jugador['cartas'].remove(jugador['cartas'][descartar])
+        print("nueva mesa: ", mesa)
+        print("nueva mano jugador: ", jugador['cartas'])
     return jugador
 
-while(len(mazo)):
-    for turno in range(3):
+jugadores = jugar(list(jugadores)[0])
+
+""" while(len(mazo)):
+    
+     print(len(mazo)) 
+     for turno in range(3):
+        
+        print('Jugadores: ',jugadores)
+        print('len: ', len(list(jugadores)))
+        
         jugadores = map(jugar, jugadores)
             
     for x in range(3):
         jugadores = map(entregarCarta, jugadores)
 
-print("Fin del juego, se sumaran los puntos")
+     print("Fin del juego, se sumaran los puntos") """
