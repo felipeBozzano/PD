@@ -73,41 +73,46 @@ mesa = servirMesa()
 EMPIEZA EL JUEGO
 """
 def jugar(jugador):
+    print('----------------------------------------------------------------------------------')
     print("Mesa: ", mesa)
     print("Jugador: \n")
     print("\tNombre: ", jugador['nombre'])
     print("\tCartas: ", jugador['cartas'])
     cantidad_cartas_mano = len(jugador['cartas'])
     cantidad_cartas_mesa = len(mesa)
-    cartas_mano = []
+    carta_mano = 0
     cartas_mesa = []
     escoba = input('Escoba: (S)i - (N)o: ').upper()
     if escoba == 'S':
-        cantidad_cartas_mano_usar = int(input('Cantidad cartas en mano a usar: (1-%d): ' %cantidad_cartas_mano))
-        for x in range(cantidad_cartas_mano_usar):
-            carta_elegida = 0
-            while carta_elegida < 1 or carta_elegida > cantidad_cartas_mano:
-                carta_elegida = int(input('Elija sus cartas: (1-%d): ' %cantidad_cartas_mano))    
-            cartas_mano.append(jugador['cartas'][carta_elegida-1])
-            jugador['cartas'].remove(jugador['cartas'][carta_elegida-1])
-            cantidad_cartas_mano = len(jugador['cartas'])
-            print("\tCartas: ", jugador['cartas'])
+        carta_elegida = 0
+        while carta_elegida < 1 or carta_elegida > cantidad_cartas_mano:
+            carta_elegida = int(input('Elija su carta: (1-%d): ' %cantidad_cartas_mano))    
+        carta_mano = jugador['cartas'][carta_elegida-1]
+        jugador['cartas'].remove(carta_mano)
+        cantidad_cartas_mano = len(jugador['cartas'])
+        print("\tNueva mano de %s: " %jugador['nombre'], jugador['cartas'])
+        print("Mesa: ", mesa)
         cantidad_cartas_mesa_usar = int(input('Cantidad cartas en mesa a usar: (1-%d): ' %cantidad_cartas_mesa))
         for x in range(cantidad_cartas_mesa_usar):
             carta_elegida = 0
             while carta_elegida < 1 or carta_elegida > cantidad_cartas_mesa:
-                print("Mesa: ", mesa)
-                carta_elegida = int(input('Elija carta de la mesa que suma 15 con la de su mano: (1-%d): ' %cantidad_cartas_mesa)) 
-            cartas_mesa.append(mesa[carta_elegida-1])
-            mesa.remove(mesa[carta_elegida-1])
-            cantidad_cartas_mesa = len(mesa)
+                carta_elegida = int(input('Elija la/s carta/s de la mesa que suma/n 15 con la de su mano: (1-%d): ' %cantidad_cartas_mesa))
+            carta_mesa = mesa[carta_elegida-1]
+            cartas_mesa.append(carta_mesa)
             print("Mesa: ", mesa)
-        if verificarEscoba(cartas_mano, cartas_mesa):
-            for carta in range(len(cartas_mano)):
-                jugador['monton'].append(carta)
-            for carta in range(len(cartas_mesa)):
+        if verificarEscoba(carta_mano, cartas_mesa):
+            print('Felicitaciones, hiciste escoba !')
+            jugador['monton'].append(carta_mano)
+            for carta in cartas_mesa:
                 jugador['monton'].append(carta)
                 mesa.remove(carta)
+        else:
+            print('Escoba incorrecta !')
+            descartar = 0
+            while descartar < 1 or descartar > cantidad_cartas_mano:
+                descartar = int(input('Elija una carta de su mano para dejar en mesa: (1-%d): ' %cantidad_cartas_mano))
+            mesa.append(jugador['cartas'][descartar-1])
+            jugador['cartas'].remove(jugador['cartas'][descartar-1])
     else:
         descartar = 0
         while descartar < 1 or descartar > cantidad_cartas_mano:
@@ -116,10 +121,8 @@ def jugar(jugador):
         jugador['cartas'].remove(jugador['cartas'][descartar-1])
     return jugador
 
-def verificarEscoba(cartas_mano, cartas_mesa):
-    suma_parcial = 0
-    for mano in cartas_mano:
-        suma_parcial += mano[0]
+def verificarEscoba(carta_mano, cartas_mesa):
+    suma_parcial = carta_mano[0]
     for mesa in cartas_mesa:
         suma_parcial += mesa[0]
     if(suma_parcial == 15):
