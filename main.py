@@ -1,6 +1,5 @@
 from itertools import cycle
 import random
-from typing import Dict
 
 """
 BIENVENIDA AL JUEGO Y SETEO DEL NUMERO DE JUGADORES
@@ -23,8 +22,6 @@ def generarMazo():
     return espadas + bastos + oros + copas
 
 mazo = generarMazo()
-
-print("mazo: ", mazo)
 
 """
 CREACION DE JUGADORES
@@ -50,8 +47,6 @@ def entregarCarta(jugador):
     mazo.remove(carta)
     return jugador
 
-""" for x in range(3):
-    jugadores = map(entregarCarta, jugadores) """
 for jugador in jugadores:
     for x in range(3):
         jugador = entregarCarta(jugador)
@@ -121,6 +116,9 @@ def jugar(jugador):
         jugador['cartas'].remove(jugador['cartas'][descartar-1])
     return jugador
 
+"""
+VERIFICAMO QUE SEA ESCOBA
+"""
 def verificarEscoba(carta_mano, cartas_mesa):
     suma_parcial = carta_mano[0]
     for mesa in cartas_mesa:
@@ -129,7 +127,9 @@ def verificarEscoba(carta_mano, cartas_mesa):
         return True
     return False
 
-
+"""
+CICLO DE JUEGO
+"""
 cantida_cartas_mazo = len(mazo)
 while  cantida_cartas_mazo > 0:
     for turno in range(3):
