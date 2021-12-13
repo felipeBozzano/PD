@@ -92,22 +92,60 @@ def comienzaJuego(jugadores, mesa, mazo, cantidad):
             juega = servirJugadores(mazo, jugadores, cantidad)
             print('----------------------------------------------------------------------------------')
 
+def parsearValor(carta):
+    if carta == 10:
+        return 8
+    if carta == 11:
+        return 9
+    if carta == 12:
+        return 10
+    return carta
+
+def sumarQuince(mesa, resto, indices):
+    mesa_actual = mesa.copy()
+
+    if len(mesa_actual) == 1:
+        valor_carta = parsearValor(mesa_actual[0][0])
+        if resto != valor_carta:
+            return False, indices
+
+    for x in mesa_actual:
+        valor_carta = parsearValor(x[0])
+        if resto == valor_carta:
+            indices.append(x)
+            return True, indices
+
+    for x in mesa_actual:
+        valor_carta = parsearValor(x[0])
+        if (resto - valor_carta) > 0:
+            resto -= valor_carta
+            indices.append(x)
+            mesa_actual.remove(x)
+            condicion, nuevos_indices = sumarQuince(mesa_actual, resto, indices)
+            if condicion:
+                return condicion, nuevos_indices
+
+    return False, indices
+
 def jugar(turno):
     jugador = turno[0]
     mesa = turno[1]
 
     estadoTurno(jugador, mesa)
 
-    escoba = input('Escoba: (S)i - (N)o: ').upper()
-    if escoba == 'S':
-        carta_mano_elegida = elegirCartaMano(jugador)
-        cartas_mesa_elegidas = elegirCartasMesa(mesa)
-        if not verificarEscoba(carta_mano_elegida, cartas_mesa_elegidas):
-            print("EL JUGADOR SE HA EQUIVOCADO - Debera descartar una carta")
-            descartarCarta(jugador, mesa)
-        else:
-            actualizarMonton(jugador, mesa, carta_mano_elegida,cartas_mesa_elegidas)
-    else:
+    condicion = False
+
+    cartas_jugador = jugador['cartas']
+    for x in cartas_jugador:
+        cartas = list()
+        valor_carta = parsearValor(x[0])
+        resto = 15 - valor_carta
+        condicion, cartas = sumarQuince(mesa, resto, cartas)
+        if condicion:
+            actualizarMonton(jugador, mesa, x, cartas)
+            break
+
+    if not condicion:
         print("Debera descartar una carta")
         descartarCarta(jugador, mesa)
 
@@ -152,15 +190,16 @@ def elegirCartasMesa(mesa):
 VERIFICAMOS QUE SEA ESCOBA
 """
 def verificarEscoba(carta_mano, cartas_mesa):
-    suma_mesa = reduce(lambda x, y: (parsearValor(x[0]) + parsearValor(y[0]),
-                                     parsearValor(x[1]) + parsearValor(y[1])), cartas_mesa)[0]
+    suma_mesa = reduce(lambda x, y: (x[0] + y[0], x[1] + y[1]), cartas_mesa)[0]
     return carta_mano[0]+suma_mesa == 15
 
 """
 TIRA UNA CARTA DE LA MANO A LA MESA
 """
 def descartarCarta(jugador, mesa):
-    carta_a_descartar = elegirCartaMano(jugador)
+    carta_a_descartar = (0, 'Oro')
+    if len(jugador['cartas']):
+        carta_a_descartar = jugador['cartas'][0]
     mesa.append(carta_a_descartar)
     jugador['cartas'].remove(carta_a_descartar)
 
@@ -184,16 +223,8 @@ def sumarPuntaje(jugadores):
 def tomarPuntajes(jugador):
     suma_monton = reduce(lambda x, y: (parsearValor(x[0]) + parsearValor(y[0]),
                                        parsearValor(x[1]) + parsearValor(y[1])), jugador['monton'])[0]
+    print(suma_monton)
     return suma_monton
-
-def parsearValor(carta):
-    if carta == 10:
-        return 8
-    if carta == 11:
-        return 9
-    if carta == 12:
-        return 10
-    return carta
 
 def main():
     cantidad_de_jugadores = bienvenida()
@@ -215,6 +246,13 @@ def main():
     print(jugadores)
 
     print(puntaje)
+
+    suma_mesa = 0
+    for x in mesa:
+        suma_mesa += parsearValor(x[0])
+
+    print(mesa)
+    print(suma_mesa)
 
 if __name__ == "__main__":
     main()
