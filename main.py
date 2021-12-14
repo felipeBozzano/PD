@@ -152,9 +152,10 @@ def elegirCartasMesa(mesa):
 VERIFICAMOS QUE SEA ESCOBA
 """
 def verificarEscoba(carta_mano, cartas_mesa):
-    suma_mesa = reduce(lambda x, y: (parsearValor(x[0]) + parsearValor(y[0]),
-                                     parsearValor(x[1]) + parsearValor(y[1])), cartas_mesa)[0]
-    return carta_mano[0]+suma_mesa == 15
+    cartas = cartas_mesa.append(carta_mano)
+    cartas_parseadas = list(map(parsearValor, cartas))
+    suma = reduce(lambda x, y: x + y, cartas_parseadas)
+    return suma == 15
 
 """
 TIRA UNA CARTA DE LA MANO A LA MESA
@@ -182,18 +183,18 @@ def sumarPuntaje(jugadores):
     return puntaje
 
 def tomarPuntajes(jugador):
-    suma_monton = reduce(lambda x, y: (parsearValor(x[0]) + parsearValor(y[0]),
-                                       parsearValor(x[1]) + parsearValor(y[1])), jugador['monton'])[0]
+    cartas_monton = list(map(parsearValor, jugador['monton']))
+    suma_monton = reduce(lambda x, y: x + y, cartas_monton)
     return suma_monton
 
 def parsearValor(carta):
-    if carta == 10:
+    if carta[0] == 10:
         return 8
-    if carta == 11:
+    if carta[0] == 11:
         return 9
-    if carta == 12:
+    if carta[0] == 12:
         return 10
-    return carta
+    return carta[0]
 
 def main():
     cantidad_de_jugadores = bienvenida()

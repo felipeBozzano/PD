@@ -93,30 +93,30 @@ def comienzaJuego(jugadores, mesa, mazo, cantidad):
             print('----------------------------------------------------------------------------------')
 
 def parsearValor(carta):
-    if carta == 10:
+    if carta[0] == 10:
         return 8
-    if carta == 11:
+    if carta[0] == 11:
         return 9
-    if carta == 12:
+    if carta[0] == 12:
         return 10
-    return carta
+    return carta[0]
 
 def sumarQuince(mesa, resto, indices):
     mesa_actual = mesa.copy()
 
     if len(mesa_actual) == 1:
-        valor_carta = parsearValor(mesa_actual[0][0])
+        valor_carta = parsearValor(mesa_actual[0])
         if resto != valor_carta:
             return False, indices
 
     for x in mesa_actual:
-        valor_carta = parsearValor(x[0])
+        valor_carta = parsearValor(x)
         if resto == valor_carta:
             indices.append(x)
             return True, indices
 
     for x in mesa_actual:
-        valor_carta = parsearValor(x[0])
+        valor_carta = parsearValor(x)
         if (resto - valor_carta) > 0:
             resto -= valor_carta
             indices.append(x)
@@ -138,7 +138,7 @@ def jugar(turno):
     cartas_jugador = jugador['cartas']
     for x in cartas_jugador:
         cartas = list()
-        valor_carta = parsearValor(x[0])
+        valor_carta = parsearValor(x)
         resto = 15 - valor_carta
         condicion, cartas = sumarQuince(mesa, resto, cartas)
         if condicion:
@@ -221,9 +221,9 @@ def sumarPuntaje(jugadores):
     return puntaje
 
 def tomarPuntajes(jugador):
-    suma_monton = reduce(lambda x, y: (parsearValor(x[0]) + parsearValor(y[0]),
-                                       parsearValor(x[1]) + parsearValor(y[1])), jugador['monton'])[0]
-    print(suma_monton)
+    cartas_monton = list(map(parsearValor, jugador['monton']))
+    suma_monton = reduce(lambda x, y: x + y, cartas_monton)
+    print("suma_monton: ", suma_monton)
     return suma_monton
 
 def main():
@@ -243,16 +243,16 @@ def main():
 
     puntaje = sumarPuntaje(jugadores)
 
-    print(jugadores)
+    print("Jugadores: ", jugadores)
 
-    print(puntaje)
+    print("Punaje: ", puntaje)
 
     suma_mesa = 0
     for x in mesa:
-        suma_mesa += parsearValor(x[0])
+        suma_mesa += parsearValor(x)
 
-    print(mesa)
-    print(suma_mesa)
+    print("Mesa: ", mesa)
+    print("Suma Mesa: ", suma_mesa)
 
 if __name__ == "__main__":
     main()
