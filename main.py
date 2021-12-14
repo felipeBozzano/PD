@@ -196,6 +196,24 @@ def parsearValor(carta):
         return 10
     return carta[0]
 
+"""
+MUESTRA COMO TERMINARON LOS JUGADORES
+"""
+def estadoJugador(jugador):
+    print('----------------------------------------------------------------------------------')
+    print("Jugador: \n")
+    print("\tNombre: ", jugador['nombre'])
+    print("\tMonton>: ", jugador['monton'])
+    return jugador
+
+"""
+CALCULA EL PUNTAJE FINAL Y EL/LOS GANADOR/ES
+"""
+def puntajeFinal(puntaje):
+    m = max(puntaje)
+    ganadores = [i for i, j in enumerate(puntaje) if j == m]
+    return m, ganadores
+
 def main():
     cantidad_de_jugadores = bienvenida()
 
@@ -211,11 +229,18 @@ def main():
 
     comienzaJuego(jugadores, mesa, mazo, cantidad_de_jugadores)
 
+    map(estadoJugador, jugadores)
+
     puntaje = sumarPuntaje(jugadores)
 
-    print(jugadores)
+    maximo, ganadores = puntajeFinal(puntaje)
 
-    print(puntaje)
+    if len(ganadores) == 1:
+        print("EL GANADOR ES... {}!!! CON {} PUNTOS!!!".format(jugadores[ganadores[0]]['nombre'], maximo))
+    else:
+        print("CON {} PUNTOS... TENEMOS UN EMPATE ENTRE...".format(maximo))
+        for i in ganadores:
+            print(jugadores[i]['nombre'])
 
 if __name__ == "__main__":
     main()

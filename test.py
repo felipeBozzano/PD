@@ -223,8 +223,25 @@ def sumarPuntaje(jugadores):
 def tomarPuntajes(jugador):
     cartas_monton = list(map(parsearValor, jugador['monton']))
     suma_monton = reduce(lambda x, y: x + y, cartas_monton)
-    print("suma_monton: ", suma_monton)
     return suma_monton
+
+"""
+CALCULA EL PUNTAJE FINAL Y EL/LOS GANADOR/ES
+"""
+def puntajeFinal(puntaje):
+    m = max(puntaje)
+    ganadores = [i for i, j in enumerate(puntaje) if j == m]
+    return m, ganadores
+
+"""
+MUESTRA COMO TERMINARON LOS JUGADORES
+"""
+def estadoJugador(jugador):
+    print('----------------------------------------------------------------------------------')
+    print("Jugador: \n")
+    print("\tNombre: ", jugador['nombre'])
+    print("\tMonton>: ", jugador['monton'])
+    return jugador
 
 def main():
     cantidad_de_jugadores = bienvenida()
@@ -241,18 +258,25 @@ def main():
 
     comienzaJuego(jugadores, mesa, mazo, cantidad_de_jugadores)
 
-    puntaje = sumarPuntaje(jugadores)
-
-    print("Jugadores: ", jugadores)
-
-    print("Punaje: ", puntaje)
-
     suma_mesa = 0
     for x in mesa:
         suma_mesa += parsearValor(x)
 
     print("Mesa: ", mesa)
     print("Suma Mesa: ", suma_mesa)
+
+    map(estadoJugador, jugadores)
+
+    puntaje = sumarPuntaje(jugadores)
+
+    maximo, ganadores = puntajeFinal(puntaje)
+
+    if len(ganadores) == 1:
+        print("EL GANADOR ES... {}!!! CON {} PUNTOS!!!".format(jugadores[ganadores[0]]['nombre'], maximo))
+    else:
+        print("CON {} PUNTOS... TENEMOS UN EMPATE ENTRE...".format(maximo))
+        for i in ganadores:
+            print(jugadores[i]['nombre'])
 
 if __name__ == "__main__":
     main()
