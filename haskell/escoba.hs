@@ -11,6 +11,6 @@ main = do
 
     print "HOLAAA"
 
-    print $ mostrarJugadores players
+    mostrarJugadores players
 
-    print "HOLAAA"
+print "HOLAAA"

@@ -59,7 +59,7 @@ numerosAleatorios :: IO[Int]
 numerosAleatorios = shuffle ([1 .. 7] ++ [10 .. 12])
 -}
 
-{-
+
 mezclarCartas :: [Carta] -> [Carta] -> IO [Carta]
 mezclarCartas mezclado [] = return mezclado
 mezclarCartas mezclado sinMezclar = do
@@ -69,4 +69,3 @@ mezclarCartas mezclado sinMezclar = do
       sinMezclarDesppues = drop (indiceCartaRandom + 1) sinMezclar
 
   mezclarCartas (cartaRandom:mezclado) (sinMezclarAntes ++ sinMezclarDesppues)
--}

@@ -17,6 +17,7 @@ def bienvenida():
 GENERACION DEL MAZO DE CARTAS
 """
 def generarMazo():
+    """Listas por comprension https://github.com/meschoyez/PresentacionesProgFuncional/blob/master/src/main/haskell/Cartas.hs"""
     numeros = list(range(1,8)) + list(range(10,13))
     espadas = list(zip(numeros, cycle(['Espada'])))
     bastos = list(zip(numeros, cycle(['Basto'])))
@@ -38,11 +39,7 @@ def crearJugadores(cantidad):
 SE MEZCLA TODO EL MAZO
 """
 def mezclarMazo(mazo):
-    for i in range(len(mazo)):
-        indice_aleatorio = random.randint(0, len(mazo) - 1)
-        temporal = mazo[i]
-        mazo[i] = mazo[indice_aleatorio]
-        mazo[indice_aleatorio] = temporal
+    random.shuffle(mazo)
 
 """
 REPARTO DE CARTAS A LOS JUGADORES
@@ -52,9 +49,11 @@ def servirJugadores(mazo, jugadores, cantidad):
         return False
 
     cartas = mazo[0:cantidad*3]
+    """utilizar operador : (para generear una sublista => mazo) """
     quitarCartas(mazo, cartas)
 
     for x in range(3):
+        """zip con repeat"""
         list(map(lambda c, j: j['cartas'].append(c), cartas, jugadores))
         quitarCartas(cartas, cartas[0:cantidad])
 
@@ -68,6 +67,7 @@ def quitarCartas(mazo, cartas):
 REPARTO DE CARTAS EN LA MESA
 """
 def servirMesa(mazo):
+    """operador de corte -> 4"""
     mesa = mazo[0:4]
     quitarCartas(mazo, mesa)
 
@@ -221,8 +221,9 @@ def main():
 
     jugadores = crearJugadores(cantidad_de_jugadores)
 
-    mezclarMazo(mazo)
+    random.shuffle(mazo)
 
+    """quitarCarta()"""
     servirJugadores(mazo, jugadores, cantidad_de_jugadores)
 
     mesa = servirMesa(mazo)
