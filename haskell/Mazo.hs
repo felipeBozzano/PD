@@ -4,16 +4,14 @@ module Mazo
     Carta(..),
     getValor,
     getPalo,
-    crearCartas,
-    crearMazoPalo,
-    convertirCartas,
-    crearMazo
+    crearMazo,
+    mezclarCartas
 ) where
 
 import System.Random
 
 -- Definimos el tipo de dato Palo
-data Palo = Copa | Espada | Oro | Basto deriving Show
+data Palo = Copa | Espada | Oro | Basto deriving (Show, Enum)
 
 -- Definimos el tipo de dato Carta
 data Carta = Carta { valor:: Int, palo:: Palo }
@@ -28,37 +26,8 @@ getValor = valor
 getPalo :: Carta -> Palo
 getPalo = palo
 
-crearCartas :: Palo -> [(Int, Palo)]
-crearCartas x = zip ([1..7] ++ [10..12]) (replicate 10 x)
-
-crearMazoPalo :: [(Int, Palo)]
-crearMazoPalo = crearCartas Espada ++ crearCartas Basto ++ crearCartas Copa ++ crearCartas Oro
-
-convertirCartas :: [(Int, Palo)] -> [Carta]
-convertirCartas = map (uncurry Carta)
-
 crearMazo :: [Carta]
-crearMazo = convertirCartas crearMazoPalo
-
---newtype Mazo = Mazo { cartas :: [Carta] }
-{-
-instance Show Mazo where
-  show (Mazo m) = show m
--}
-
-{-
-shuffle :: [a] -> IO [a]
-shuffle [] = return []
-shuffle xs = do randomPosition <- getStdRandom (randomR (0, length xs - 1))
-                let (left, a:right) = splitAt randomPosition xs
-                fmap (a:) (shuffle (left ++ right))
--}
-
-{-
-numerosAleatorios :: IO[Int]
-numerosAleatorios = shuffle ([1 .. 7] ++ [10 .. 12])
--}
-
+crearMazo = [Carta v p | p <- [Copa ..], v <- [1..7] ++ [10..12]]
 
 mezclarCartas :: [Carta] -> [Carta] -> IO [Carta]
 mezclarCartas mezclado [] = return mezclado

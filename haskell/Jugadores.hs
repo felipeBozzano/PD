@@ -3,7 +3,10 @@ module Jugadores
 (
     Jugador(..),
     crearJugadores,
-    crearJugador
+    crearJugador,
+    servirJugadores,
+    cartasJugadores,
+    reemplazarJugador
 ) where
 
 import Mazo
@@ -25,24 +28,25 @@ crearJugador = do
         jugador = Jugador nombre [] []
     return jugador
 
-{-
-mostrarJugadores :: Show a1 => [IO a1] -> IO (Maybe a2)
-mostrarJugadores [] =
-    return Nothing
-mostrarJugadores x = do
-    jugador <- head x
-    let string = show jugador
-    putStrLn string
-    mostrarJugadores $ tail x
+servirJugador :: [Carta] -> (Jugador,Int) -> Jugador
+servirJugador mano (jugador,num)
+    | num == 1 = Jugador (nombre jugador) (take 3 mano) (monton jugador)
+    | num > 1 = Jugador (nombre jugador) (take 3 $ drop ((num-1)*3) mano) (monton jugador)
+    | otherwise = Jugador "Fallo" [] []
 
-crearJugadores :: Int -> [Jugador] -> IO[Jugador]
-crearJugadores 0 jugadores =
-    return jugadores
-crearJugadores n jugadores = do
-    putStr "Por favor, ingrese el nombre del jugador: "
-    name <- getLine
-    let nombre = name
-        jugador = Jugador nombre [] []
-        jugadores = jugadores ++ [jugador]
-    crearJugadores (n-1) jugadores
--}
+servirJugadores :: [Jugador] -> [Carta] -> [Jugador]
+servirJugadores jugadores mazo = zipWith (curry (servirJugador mazo)) jugadores [1..length jugadores]
+
+cartasJugadores :: [Jugador] -> Bool
+cartasJugadores jugadores = map cartasJugador jugadores == replicate (length jugadores) False
+
+cartasJugador :: Jugador -> Bool
+cartasJugador x
+    | null (cartas x) = False
+    | otherwise = True
+
+reemplazarJugador :: Jugador -> [Jugador] -> Int -> [Jugador]
+reemplazarJugador jugador jugadores posicion
+    | null jugadores = []
+    | posicion == 0 = jugador : reemplazarJugador jugador (tail jugadores) (posicion-1)
+    | otherwise = head jugadores : reemplazarJugador jugador (tail jugadores) (posicion-1)
