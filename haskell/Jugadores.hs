@@ -6,10 +6,13 @@ module Jugadores
     crearJugador,
     servirJugadores,
     cartasJugadores,
-    reemplazarJugador
+    reemplazarJugador,
+    calcularGanador
 ) where
 
 import Mazo
+import Data.List (sortOn)
+import Data.Ord (comparing)
 
 data Jugador = Jugador { nombre::String, cartas::[Carta], monton::[Carta]}
 
@@ -50,3 +53,9 @@ reemplazarJugador jugador jugadores posicion
     | null jugadores = []
     | posicion == 0 = jugador : reemplazarJugador jugador (tail jugadores) (posicion-1)
     | otherwise = head jugadores : reemplazarJugador jugador (tail jugadores) (posicion-1)
+
+calcularGanador :: [Jugador] -> (Int, Jugador)
+calcularGanador jugadores = last (sortOn fst (map calularPuntaje jugadores))
+
+calularPuntaje :: Jugador -> (Int, Jugador)
+calularPuntaje jugador = (sum (map getValor (monton jugador)), jugador)

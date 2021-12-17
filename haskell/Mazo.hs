@@ -5,23 +5,28 @@ module Mazo
     getValor,
     getPalo,
     crearMazo,
-    mezclarCartas
+    mezclarCartas,
+    quitarCarta,
 ) where
 
 import System.Random
 
 -- Definimos el tipo de dato Palo
-data Palo = Copa | Espada | Oro | Basto deriving (Show, Enum)
+data Palo = Copa | Espada | Oro | Basto deriving (Show, Enum, Eq)
 
 -- Definimos el tipo de dato Carta
-data Carta = Carta { valor:: Int, palo:: Palo }
+data Carta = Carta { valor:: Int, palo:: Palo } deriving Eq
 
 -- Redefinimos el Show para Carta
 instance Show Carta where
   show (Carta valor palo) = "(" ++ show valor ++ ", " ++ show palo ++ ")"
 
 getValor :: Carta -> Int
-getValor = valor
+getValor carta 
+  | valor carta == 12 = 10
+  | valor carta == 11 = 9
+  | valor carta == 10 = 8
+  | otherwise  = valor carta
 
 getPalo :: Carta -> Palo
 getPalo = palo
@@ -38,3 +43,9 @@ mezclarCartas mezclado sinMezclar = do
       sinMezclarDesppues = drop (indiceCartaRandom + 1) sinMezclar
 
   mezclarCartas (cartaRandom:mezclado) (sinMezclarAntes ++ sinMezclarDesppues)
+
+quitarCarta :: [Carta] -> Int -> [Carta]
+quitarCarta cartas posicion
+    | null cartas = []
+    | posicion == 0 = quitarCarta (tail cartas) (posicion-1)
+    | otherwise = head cartas : quitarCarta (tail cartas) (posicion-1)
