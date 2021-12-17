@@ -19,22 +19,29 @@ main = do
 
     jugadoresTerminados <- jugadoresListos
 
+    let puntajes = calcularPuntajes jugadoresTerminados
 
+    putStrLn "--------------------------------------------------------------------"
+    putStrLn ""
+    putStrLn "Los puntajes son los siguientes"
+    print puntajes
 
-    let ganador = calcularGanador jugadoresTerminados
-
-    putStrLn ("Ganador: " ++ show (snd ganador) ++ "\n" ++ "\tPuntaje: " ++ show (fst ganador))
+    putStrLn ""
+    putStrLn "--------------------------------------------------------------------"
+    putStrLn ("Ganador: " ++ show (snd (last puntajes)) ++ "\n" ++ "\tPuntaje: " ++ show (fst (last puntajes)))
+    putStrLn "--------------------------------------------------------------------"
 
 comenzarJuego :: [Jugador] -> [Carta] -> [Carta] -> Int -> IO [Jugador]
 comenzarJuego jugadores mesa mazo num
-    | null mazo && cartasJugadores jugadores = return jugadores
-    | cartasJugadores jugadores = do
-        print "Hola"
+    | null mazo && manosVacias jugadores = return jugadores
+    | manosVacias jugadores = do
         comenzarJuego (servirJugadores jugadores mazo)
             mesa (drop (length jugadores * 3) mazo) num
     | otherwise = do
         let turno = (jugadores !! num, mesa)
 
+        putStrLn ""
+        putStrLn "--------------------------------------------------------------------"
         print $ "Jugador: " ++ show (fst turno)
         print $ "Mesa: " ++ show (snd turno)
 
@@ -47,12 +54,7 @@ comenzarJuego jugadores mesa mazo num
             jugadoresActualizados = reemplazarJugador player jugadores num
             ronda = (num + 1) `mod` length jugadores
 
-        let test = (Jugador (nombre player) [] (monton player), snd turno)
-            test2 = reemplazarJugador (fst test) jugadoresActualizados num
-        comenzarJuego test2 tapete mazo ronda
-
-        {- comenzarJuego jugadoresActualizados tapete mazo ronda -}
-
+        comenzarJuego jugadoresActualizados tapete mazo ronda
 
 jugar :: (Jugador, [Carta]) -> IO (Jugador, [Carta])
 jugar turno = do
@@ -60,23 +62,18 @@ jugar turno = do
     respuesta <- getLine
     putStr "Elija una carta de su mano: "
     cartaMano <- getLine
-    let cartaManoElegida = (read cartaMano :: Int) - 1
-    jugada turno (escoba respuesta) cartaManoElegida
+    let cartaManoElegida = cartas (fst turno) !! ((read cartaMano :: Int) - 1)
+    jugada turno (respuesta == "S") cartaManoElegida
 
-escoba :: String -> Bool
-escoba respuesta = respuesta == "S"
-
-jugada :: (Jugador, [Carta]) -> Bool -> Int -> IO (Jugador, [Carta])
-jugada (jugador, mesa) escoba posicionCarta
-    | not escoba = return (Jugador (nombre jugador) (quitarCarta (cartas jugador) posicionCarta) (monton jugador), mesa ++
-    [cartas jugador !! posicionCarta])
+jugada :: (Jugador, [Carta]) -> Bool -> Carta -> IO (Jugador, [Carta])
+jugada (jugador, mesa) escoba cartaMano
+    | not escoba = return (Jugador (nombre jugador) (filter (/= cartaMano) (cartas jugador)) (monton jugador), 
+                            mesa ++ [cartaMano])
     | otherwise = do
         putStr "Cantidad cartas en mesa a usar: "
         cantidadCartasMesa <- getLine
         cartasMesaElegidas <- elegirCartasMesa (read cantidadCartasMesa :: Int) mesa []
-        let listaCartas = (cartas jugador !! posicionCarta) : cartasMesaElegidas
-        return $ actualizarJugada listaCartas (jugador, mesa) (verificarEscoba listaCartas)
-
+        return $ actualizarJugada cartaMano cartasMesaElegidas (jugador, mesa) (verificarEscoba $ cartaMano : cartasMesaElegidas)
 
 elegirCartasMesa :: Int -> [Carta] -> [Carta] -> IO [Carta]
 elegirCartasMesa cantidadCartas mesa cartas
@@ -90,8 +87,9 @@ elegirCartasMesa cantidadCartas mesa cartas
 verificarEscoba :: [Carta] -> Bool
 verificarEscoba cartas = sum (map getValor cartas) == 15
 
-actualizarJugada :: [Carta] -> (Jugador, [Carta]) -> Bool -> (Jugador, [Carta])
-actualizarJugada cartasQuitar (jugador, mesa) escoba
-    | escoba = (Jugador (nombre jugador) (filter (/= head cartasQuitar) (cartas jugador)) (monton jugador ++ cartasQuitar), filter (`notElem`  tail cartasQuitar) mesa)
-    | otherwise = (Jugador (nombre jugador) (filter (/= head cartasQuitar) (cartas jugador)) (monton jugador), mesa ++ [head cartasQuitar])
-    
+actualizarJugada :: Carta -> [Carta] -> (Jugador, [Carta]) -> Bool -> (Jugador, [Carta])
+actualizarJugada cartaMano cartasMesa (jugador, mesa) escoba
+    | escoba = (Jugador (nombre jugador) (filter (/= cartaMano) (cartas jugador)) (monton jugador ++ cartaMano : cartasMesa), 
+                filter (`notElem` cartasMesa) mesa)
+    | otherwise = (Jugador (nombre jugador) (filter (/= cartaMano) (cartas jugador)) (monton jugador), 
+                    mesa ++ [cartaMano])

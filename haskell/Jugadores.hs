@@ -5,8 +5,9 @@ module Jugadores
     crearJugadores,
     crearJugador,
     servirJugadores,
-    cartasJugadores,
+    manosVacias,
     reemplazarJugador,
+    calcularPuntajes,
     calcularGanador
 ) where
 
@@ -40,11 +41,11 @@ servirJugador mano (jugador,num)
 servirJugadores :: [Jugador] -> [Carta] -> [Jugador]
 servirJugadores jugadores mazo = zipWith (curry (servirJugador mazo)) jugadores [1..length jugadores]
 
-cartasJugadores :: [Jugador] -> Bool
-cartasJugadores jugadores = map cartasJugador jugadores == replicate (length jugadores) False
+manosVacias :: [Jugador] -> Bool
+manosVacias jugadores = map manoVacia jugadores == replicate (length jugadores) False
 
-cartasJugador :: Jugador -> Bool
-cartasJugador x
+manoVacia :: Jugador -> Bool
+manoVacia x
     | null (cartas x) = False
     | otherwise = True
 
@@ -56,6 +57,9 @@ reemplazarJugador jugador jugadores posicion
 
 calcularGanador :: [Jugador] -> (Int, Jugador)
 calcularGanador jugadores = last (sortOn fst (map calularPuntaje jugadores))
+
+calcularPuntajes :: [Jugador] -> [(Int, Jugador)]
+calcularPuntajes jugadores = sortOn fst (map calularPuntaje jugadores)
 
 calularPuntaje :: Jugador -> (Int, Jugador)
 calularPuntaje jugador = (sum (map getValor (monton jugador)), jugador)

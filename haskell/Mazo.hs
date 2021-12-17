@@ -6,7 +6,7 @@ module Mazo
     getPalo,
     crearMazo,
     mezclarCartas,
-    quitarCarta,
+    --quitarCarta,
 ) where
 
 import System.Random
@@ -43,9 +43,3 @@ mezclarCartas mezclado sinMezclar = do
       sinMezclarDesppues = drop (indiceCartaRandom + 1) sinMezclar
 
   mezclarCartas (cartaRandom:mezclado) (sinMezclarAntes ++ sinMezclarDesppues)
-
-quitarCarta :: [Carta] -> Int -> [Carta]
-quitarCarta cartas posicion
-    | null cartas = []
-    | posicion == 0 = quitarCarta (tail cartas) (posicion-1)
-    | otherwise = head cartas : quitarCarta (tail cartas) (posicion-1)
