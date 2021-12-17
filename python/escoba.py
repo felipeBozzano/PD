@@ -17,13 +17,10 @@ def bienvenida():
 GENERACION DEL MAZO DE CARTAS
 """
 def generarMazo():
-    """Listas por comprension https://github.com/meschoyez/PresentacionesProgFuncional/blob/master/src/main/haskell/Cartas.hs"""
     numeros = list(range(1,8)) + list(range(10,13))
-    espadas = list(zip(numeros, cycle(['Espada'])))
-    bastos = list(zip(numeros, cycle(['Basto'])))
-    oros = list(zip(numeros, cycle(['Oro'])))
-    copas = list(zip(numeros, cycle(['Copa'])))
-    return espadas + bastos + oros + copas
+    palos = ['Espada', 'Basto', 'Oro', 'Copa']
+    mazo = [(n, p) for n in numeros for p in palos]
+    return mazo
 
 """
 CREACION DE JUGADORES
@@ -36,26 +33,14 @@ def crearJugadores(cantidad):
     return lista_jugadores
 
 """
-SE MEZCLA TODO EL MAZO
-"""
-def mezclarMazo(mazo):
-    random.shuffle(mazo)
-
-"""
 REPARTO DE CARTAS A LOS JUGADORES
 """
 def servirJugadores(mazo, jugadores, cantidad):
     if len(mazo) < cantidad*3:
         return False
 
-    cartas = mazo[0:cantidad*3]
-    """utilizar operador : (para generear una sublista => mazo) """
-    quitarCartas(mazo, cartas)
-
-    for x in range(3):
-        """zip con repeat"""
-        list(map(lambda c, j: j['cartas'].append(c), cartas, jugadores))
-        quitarCartas(cartas, cartas[0:cantidad])
+    list(map(lambda c, j: j['cartas'].append(c), mazo[0:cantidad*3], cycle(jugadores)))
+    quitarCartas(mazo, mazo[0:cantidad*3])
 
     return True
 
@@ -64,22 +49,11 @@ def quitarCartas(mazo, cartas):
         mazo.remove(n)
 
 """
-REPARTO DE CARTAS EN LA MESA
-"""
-def servirMesa(mazo):
-    """operador de corte -> 4"""
-    mesa = mazo[0:4]
-    quitarCartas(mazo, mesa)
-
-    return mesa
-
-"""
 EMPIEZA EL JUEGO
 """
 def comienzaJuego(jugadores, mesa, mazo, cantidad):
-    turno = []
-    for jugador in jugadores:
-        turno.append((jugador, mesa))
+
+    turno = list(zip(jugadores, cycle([mesa])))
 
     ronda = 0
 
@@ -90,7 +64,6 @@ def comienzaJuego(jugadores, mesa, mazo, cantidad):
         ronda += 1
         if ronda % 3 == 0:
             juega = servirJugadores(mazo, jugadores, cantidad)
-            print('----------------------------------------------------------------------------------')
 
 def jugar(turno):
     jugador = turno[0]
@@ -101,12 +74,16 @@ def jugar(turno):
     escoba = input('Escoba: (S)i - (N)o: ').upper()
     if escoba == 'S':
         carta_mano_elegida = elegirCartaMano(jugador)
-        cartas_mesa_elegidas = elegirCartasMesa(mesa)
+
+        cantidad_cartas_mesa_usar = int(input('Cantidad cartas en mesa a usar: (1-%d): ' % len(mesa)))
+        cartas_mesa_elegidas = []
+        elegirCartasMesa(mesa, cantidad_cartas_mesa_usar, cartas_mesa_elegidas)
+
         if not verificarEscoba(carta_mano_elegida, cartas_mesa_elegidas):
             print("EL JUGADOR SE HA EQUIVOCADO - Debera descartar una carta")
             descartarCarta(jugador, mesa)
         else:
-            actualizarMonton(jugador, mesa, carta_mano_elegida,cartas_mesa_elegidas)
+            actualizarMonton(jugador, mesa, carta_mano_elegida, cartas_mesa_elegidas)
     else:
         print("Debera descartar una carta")
         descartarCarta(jugador, mesa)
@@ -134,26 +111,24 @@ def elegirCartaMano(jugador):
 """
 ELIGE LA/S CARTA/S DE LAS MESA PARA HACER ESCOBA
 """
-def elegirCartasMesa(mesa):
-    print("Mesa: ", mesa)
-    cartas_elegidas = []
-    cantidad_cartas_mesa = len(mesa)
-    cantidad_cartas_mesa_usar = int(input('Cantidad cartas en mesa a usar: (1-%d): ' % cantidad_cartas_mesa))
-    for x in range(cantidad_cartas_mesa_usar):
+def elegirCartasMesa(mesa, cantidad, cartas_mesa_elegidas):
+    if cantidad == 0:
+        return []
+    else:
         carta_elegida = 0
-        while carta_elegida < 1 or carta_elegida > cantidad_cartas_mesa:
+        while carta_elegida < 1 or carta_elegida > len(mesa):
             carta_elegida = int(
-                input('Elija la/s carta/s de la mesa que suma/n 15 con la de su mano: (1-%d): ' % cantidad_cartas_mesa))
-        carta_mesa = mesa[carta_elegida - 1]
-        cartas_elegidas.append(carta_mesa)
-    return cartas_elegidas
+                input('Elija la/s carta/s de la mesa que suma/n 15 con la de su mano: (1-%d): ' % len(mesa)))
+        cartas_mesa_elegidas.append(mesa[carta_elegida - 1])
+        return elegirCartasMesa(mesa, cantidad-1, cartas_mesa_elegidas)
 
 """
 VERIFICAMOS QUE SEA ESCOBA
 """
 def verificarEscoba(carta_mano, cartas_mesa):
-    cartas = cartas_mesa.append(carta_mano)
-    cartas_parseadas = list(map(parsearValor, cartas))
+    cartas_elegidas = cartas_mesa[:]
+    cartas_elegidas.append(carta_mano)
+    cartas_parseadas = list(map(parsearValor, cartas_elegidas))
     suma = reduce(lambda x, y: x + y, cartas_parseadas)
     return suma == 15
 
@@ -173,7 +148,9 @@ def actualizarMonton(jugador, mesa, carta_mano, cartas_mesa):
     jugador['monton'].append(carta_mano)
     jugador['cartas'].remove(carta_mano)
     jugador['monton'].extend(cartas_mesa)
-    quitarCartas(mesa, cartas_mesa)
+    #list(map(lambda c: mesa.remove(c), cartas_mesa))
+    for c in cartas_mesa:
+        mesa.remove(c)
 
 """
 SUMA EL PUNTAJE DE LOS JUGADORES
@@ -223,10 +200,11 @@ def main():
 
     random.shuffle(mazo)
 
-    """quitarCarta()"""
     servirJugadores(mazo, jugadores, cantidad_de_jugadores)
 
-    mesa = servirMesa(mazo)
+    # Servimos la mesa
+    mesa = mazo[0:4]
+    quitarCartas(mazo, mesa)
 
     comienzaJuego(jugadores, mesa, mazo, cantidad_de_jugadores)
 
