@@ -9,3 +9,11 @@
 
 - Si la cantidad de puntos sobre la mesa es igual a 10, 25, 40, 55 o 70, entonces ningun jugador se equivoco
 - Si la cantidad de puntos de cada jugador es multiplo de 15, entonces ningun jugador se equivoco
+
+
+## Si no encuentra System.Random
+    ```
+        $ sudo apt-get install cabal-install
+        $ cabal update
+        $ cabal install random
+    ```
